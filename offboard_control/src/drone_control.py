@@ -1,18 +1,67 @@
 #! /usr/bin/env python3
-
-from __future__ import division
 import rospy
-import math
-from geometry_msgs.msg import PoseStamped
-from sensor_msgs.msg import Imu
-from mavros_msgs.msg import State, Altitude, HomePosition, ExtendedState, PositionTarget
-from mavros_msgs.srv import CommandBool, SetMode, CommandTOL, ParamGet,StreamRateRequest, StreamRate
-from nav_msgs.mgs import Odometry
-from std_msgs.msg import Float64, String, Bool
-from geometry_msgs.msg import Vector3, Point
-from tf.transformations import euler_from_quaternion
+from mavros_msgs.msg import State, ExtendedState
+from geometry_msgs.msg import PoseStamped, PoseArray
+from sensor_msgs.msg import NavSatFix
+from geometry_msgs.msg import PoseWithCovarianceStamped, TransformStamped
+from std_msgs.msg import String
+from mavros_msgs.srv import CommandBool, CommandTOL, SetMode, CommandTOLRequest, SetModeRequest, CommandBoolRequest, SetModeRequest
+import tf2_ros
+import tf2_geometry_msgs
 
-class DroneControl(object):
-  
-  def __init__(self):
-    self.state = State()
+class DroneControl:
+    def __init__(self, ros_client):
+        self.ros_client_ = ros_client
+        self.ros_client_.init(self)
+
+        # The setpoint publishing rate MUST be faster than 2Hz
+        self.rate_ = rospy.Rate(ROS_RATE)
+
+        self.tfBuffer_ = tf2_ros.Buffer()
+        self.listener_ = tf2_ros.TransformListener(self.tfBuffer_)
+
+    def state_cb(self, msg):
+        pass
+
+    def extended_state_cb(self, msg):
+        pass
+
+    def marker_position_cb(self, msg):
+        pass
+
+    def local_position_cb(self, msg):
+        pass
+
+    def global_position_cb(self, msg):
+        pass
+
+    def svo_position_cb(self, msg):
+        pass
+
+    def setpoint_position_cb(self, msg):
+        pass
+
+    def approachMarker(self, marker_id, distance, altitude, offset_x, offset_y):
+        pass
+
+    def takeoff(self, takeoff_altitude):
+        pass
+
+    def setGuidedMode(self):
+        pass
+
+    def arm(self):
+        pass
+
+    def land(self):
+        pass
+
+    def publishTrajectoryEndpoint(self, setpoint_pos_ENU):
+        pass
+
+    def transformToLocalFrame(self, goal_pose):
+        pass
+
+    def transformToGlobalFrame(self, goal_pose):
+        pass
+

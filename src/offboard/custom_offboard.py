@@ -24,7 +24,7 @@ from tf.transformations import euler_from_quaternion
 class OffboardControl(object):
 
     def __init__(self):
-        self.rate = rospy.Rate(20)
+        self.rate = rospy.Rate(30)
         # 객체가 포함할 변수
         self.current_state = State() # 현재 모드 상태 파악
         self.service_timeout = 30 # 서비스 일정 시간내에 안되는지 파악
@@ -114,8 +114,13 @@ if __name__ == "__main__":
     rospy.init_node('offboard_ros_node', anonymous=True)
     try:
         drone_control = OffboardControl()
+        drone_control.check_FCU_connection()
+        drone_control.setArm()
+        drone_control.setMode("OFFBOARD")
         drone_control.fly_to_local(4.0, 5.0, 5.0)
         drone_control.fly_to_local(-2.0, 2.0, 5.0)
         rospy.spin()
     except rospy.ROSInterruptException as exception:
         pass
+
+

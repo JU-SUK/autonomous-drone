@@ -65,12 +65,26 @@ class OffboardControl(object):
     def setMode(self, mode):
         rospy.logerr('Mode Changed')
         rate = rospy.Rate(0.5)
-        while True:
-            if self.current_state.mode != mode:
-                self.set_mode_client(base_mode=0, custom_mode=mode)
-            else:
-                break
-            rate.sleep()
+        try:
+            response = self.set_mode_client(base_mode = 0, custom_mode = mode)
+            # return response.mode_sent
+        except rospy.ServiceException as e:
+            rospy.loginfo("Service call failed : %s" %e)
+        #######################응창님 코드 추천#############################
+        # if self.current_state != "OFFBOARD":
+        #     self.set_mode_client(base_mode=0, custom_mode="OFFBOARD")
+        #     self.current_target_position.header.stamp = rospy.Time.now()
+        #     self.current_target_position.pose.orientation.w = 1.0
+        #     self.local_pos_pub.publish(self.current_target_position)
+        # else:
+        #     pass
+        ##########################처음에 내가 한 것####################33
+        # while True:
+        #     if self.current_state.mode != mode:
+        #         self.set_mode_client(base_mode=0, custom_mode=mode)
+        #     else:
+        #         break
+        #     rate.sleep()
     # arming
     def setArm(self):
         rate = rospy.Rate(0.5)
@@ -99,7 +113,7 @@ class OffboardControl(object):
         while not rospy.is_shutdown() and self.distance(self.current_target_position, self.current_local_position) > 0.5:
             self.local_pos_pub.publish(self.current_target_position)
             self.rate.sleep()
-        for i in range(1*self.rate):
+        for i in range(10):
             if not rospy.is_shutdown():
                 self.local_pos_pub.publish(self.current_target_position)
                 self.rate.sleep()
@@ -119,6 +133,7 @@ if __name__ == "__main__":
         drone_control.setMode("OFFBOARD")
         drone_control.fly_to_local(4.0, 5.0, 5.0)
         drone_control.fly_to_local(-2.0, 2.0, 5.0)
+        drone_control.fly_to_local(0.0, 0.0, 10.0)
         rospy.spin()
     except rospy.ROSInterruptException as exception:
         pass

@@ -109,12 +109,33 @@ class OffboardControl(object):
         yaw = euler_from_quaternion(quaternion)[2]
         return yaw
     def fly_to_local(self,x, y, z):
+        self.current_target_position.pose.position.x = x
+        self.current_target_position.pose.position.y = y
+        self.current_target_position.pose.position.z = z
+
+        self.current_yaw = math.atan2((self.current_target_position.pose.position.y - self.current_local_position.pose.position.y), (self.current_target_position.pose.position.x - self.current_local_position.pose.position.x))
+        qz = math.sin(self.current_yaw / 2.0)
+        qw = math.cos(self.current_yaw / 2.0)
+        self.current_target_position.pose.orientation.x = 0.0
+        self.current_target_position.pose.orientation.y = 0.0
+        self.current_target_position.pose.orientation.z = qz
+        self.current_target_position.pose.orientation.w = qw
+
+        while not rospy.is_shutdown() and self.distance(self.current_target_position, self.current_local_position) > 0.5:
+            self.local_pos_pub.publish(self.current_target_position)
+            self.rate.sleep()
+        for i in range(10):
+            if not rospy.is_shutdown():
+                self.local_pos_pub.publish(self.current_target_position)
+                self.rate.sleep()
+    def fly_avoidance(self,x, y, z):
         self.avoidance_target_pos.pose.position.x = x
         self.avoidance_target_pos.pose.position.y = y
         self.avoidance_target_pos.pose.position.z = z
 
-        while not rospy.is_shutdown() and self.distance(self.avoidance_target_pos, self.current_local_position) > 0.5:
+        while not rospy.is_shutdown() and self.distance(self.avoidance_target_pos, self.current_local_position) > 1.1:
             self.target_pos_pub.publish(self.avoidance_target_pos)
+            rospy.loginfo(self.distance(self.avoidance_target_pos, self.current_local_position))
             self.rate.sleep()
         for i in range(10):
             if not rospy.is_shutdown():
@@ -134,10 +155,11 @@ if __name__ == "__main__":
         drone_control.check_FCU_connection()
         drone_control.setArm()
         drone_control.setMode("OFFBOARD")
-        drone_control.fly_to_local(0.0, 0.0, 3.0)
-        drone_control.fly_to_local(10.0, 5.0, 3.0)
-        drone_control.fly_to_local(-3.0, 6.0, 3.0)
-        drone_control.fly_to_local(0.0, 0.0, 3.0)
+        drone_control.fly_avoidance(0.0, 0.0, 15.0)
+        drone_control.fly_avoidance(100.0, 50.0, 15.0)
+        drone_control.fly_to_local(100.0, 50.0, 8.0)
+        drone_control.fly_avoidance(0.0, 135.0, 15.0)
+        drone_control.fly_avoidance(0.0, 0.0, 15.0)
         rospy.spin()
     except rospy.ROSInterruptException as exception:
         pass

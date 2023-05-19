@@ -30,6 +30,7 @@ class OffboardControl(object):
         self.service_timeout = 30 # 서비스 일정 시간내에 안되는지 파악
         self.current_local_position = PoseStamped() # 드론 현재 위치 파악
         self.current_target_position = PoseStamped() # 목표 위치 설정
+        self.current_target_velocity = Twist() # 드론 속도 제어
 
         # Subscriber
         self.state_sub = rospy.Subscriber("/mavros/state", State, self.state_cb)
@@ -110,6 +111,14 @@ class OffboardControl(object):
         self.current_target_position.pose.position.y = y
         self.current_target_position.pose.position.z = z
 
+        self.current_yaw = math.atan2((self.current_target_position.pose.position.y - self.current_local_position.pose.position.y), (self.current_target_position.pose.position.x - self.current_local_position.pose.position.x))
+        qz = math.sin(self.current_yaw / 2.0)
+        qw = math.cos(self.current_yaw / 2.0)
+        self.current_target_position.pose.orientation.x = 0.0
+        self.current_target_position.pose.orientation.y = 0.0
+        self.current_target_position.pose.orientation.z = qz
+        self.current_target_position.pose.orientation.w = qw
+
         while not rospy.is_shutdown() and self.distance(self.current_target_position, self.current_local_position) > 0.5:
             self.local_pos_pub.publish(self.current_target_position)
             self.rate.sleep()
@@ -131,9 +140,10 @@ if __name__ == "__main__":
         drone_control.check_FCU_connection()
         drone_control.setArm()
         drone_control.setMode("OFFBOARD")
-        drone_control.fly_to_local(4.0, 5.0, 5.0)
-        drone_control.fly_to_local(-2.0, 2.0, 5.0)
-        drone_control.fly_to_local(0.0, 0.0, 10.0)
+        drone_control.fly_to_local(0.0, 0.0, 3.0)
+        # drone_control.fly_to_local(100.0, 50.0, 3.0)
+        drone_control.fly_to_local(0.0, 140.0, 3.0)
+        drone_control.fly_to_local(0.0, 0.0, 3.0)
         rospy.spin()
     except rospy.ROSInterruptException as exception:
         pass

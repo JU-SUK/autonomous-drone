@@ -62,6 +62,10 @@ class OffboardControl(object):
         self.current_local_position.pose.position.x = msg.pose.position.x
         self.current_local_position.pose.position.y = msg.pose.position.y
         self.current_local_position.pose.position.z = msg.pose.position.z
+        self.current_local_position.pose.orientation.x = msg.pose.orientation.x
+        self.current_local_position.pose.orientation.y = msg.pose.orientation.y
+        self.current_local_position.pose.orientation.z = msg.pose.orientation.z
+        self.current_local_position.pose.orientation.w = msg.pose.orientation.w
     # 모드 변경
     def setMode(self, mode):
         rospy.logerr('Mode Changed')
